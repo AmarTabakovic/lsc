@@ -6,6 +6,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
+#include <string.h>
 
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
@@ -19,13 +20,18 @@
 #define SHORT_KILOBYTE "K"
 #define SHORT_MEGABYTE "M"
 #define SHORT_GIGABYTE "G"
-#define SHORT_TERRABYTE "T"
+#define SHORT_TERABYTE "T"
 #define SHORT_PETABYTE "P"
 
 typedef struct Entry
 {
 
 } Entry;
+
+int alpha_sort(const void *str1, const void *str2)
+{
+	return (strcmp((char *)str1, (char *)str2));
+}
 
 int get_longest_uid_name()
 {
@@ -47,21 +53,25 @@ char *get_file_size(off_t size)
 	{
 		sprintf(size_str, "%i %s", (int)size, SHORT_BYTE);
 	}
-	else if (size >= 1000)
+	else if (size >= 1000 && size < 1000000)
 	{
 		sprintf(size_str, "%0.1f %s", (float)size / 1000, SHORT_KILOBYTE);
 	}
-	else if (size >= 1000000)
+	else if (size >= 1000000 && size < 1000000000)
 	{
 		sprintf(size_str, "%0.1f %s", (float)size / 1000000, SHORT_MEGABYTE);
 	}
-	else if (size >= 1000000000)
+	else if (size >= 1000000000 && size < 1000000000000)
 	{
 		sprintf(size_str, "%0.1f %s", (float)size / 1000000000, SHORT_GIGABYTE);
 	}
-	else if (size >= 1000000000000)
+	else if (size >= 1000000000000 && size < 1000000000000000)
 	{
-		sprintf(size_str, "%0.1f %s", (float)size / 1000000000000, SHORT_TERRABYTE);
+		sprintf(size_str, "%0.1f %s", (float)size / 1000000000000, SHORT_TERABYTE);
+	}
+       	else
+       	{
+		sprintf(size_str, "%0.1f %s", (float)size / 1000000000000000, SHORT_PETABYTE);
 	}
 
 	return size_str;
