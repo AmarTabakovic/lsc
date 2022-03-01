@@ -25,7 +25,12 @@
 
 typedef struct Entry
 {
-
+	char permission_string[10];
+	char user_name[255];
+	char group_name[255];
+	char size_string[5];
+	char date_string[13];
+	char file_name[255];
 } Entry;
 
 int alpha_sort(const void *str1, const void *str2)
@@ -90,9 +95,9 @@ void read_directory(char *directory_name)
 		stat(element->d_name, &file_information);
 
 		struct passwd *pws;
-		pws = getpwuid(file_information.st_uid);
-
 		struct group *grp;
+
+		pws = getpwuid(file_information.st_uid);		
 		grp = getgrgid(file_information.st_gid);
 
 		char file_modified_time_str[20];
