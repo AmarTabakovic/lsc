@@ -145,7 +145,7 @@ char *get_file_permimssions(struct stat *file)
  */
 char *get_file_size(off_t size)
 {
-	char *size_str = malloc(sizeof(char) * 6);
+	char *size_str = malloc(sizeof(char) * 8);
 
 	if (size < 1000)
 	{
