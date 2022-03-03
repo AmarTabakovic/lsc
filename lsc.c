@@ -65,10 +65,10 @@ int alpha_sort(const void *str1, const void *str2)
 
 /**
  * @brief Get the longest uid and gid name object
- * 
- * @param directory_name 
- * @param uid_len 
- * @param gid_len 
+ *
+ * @param directory_name
+ * @param uid_len
+ * @param gid_len
  */
 void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_len)
 {
