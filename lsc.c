@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 
+#define ANSI_COLOR_BLACK "\x1b[30m"
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -29,6 +30,7 @@ typedef struct Entry
 	char user_name[255];
 	char group_name[255];
 	char size_string[5];
+	long size;
 	char date_string[13];
 	char file_name[255];
 } Entry;
@@ -46,8 +48,42 @@ int get_longest_gid_name()
 {
 }
 
-char *get_file_permimssions()
+char *get_file_permimssions(struct stat *file)
 {
+	char *perm_str = malloc(sizeof(char) * 7 * 10);
+
+	char *read_perm = ANSI_COLOR_YELLOW "r";
+	char *write_perm = ANSI_COLOR_GREEN "w";
+	char *exec_perm = ANSI_COLOR_RED "x";
+	char *dash_perm = ANSI_COLOR_BLACK "-";
+	char *dir = ANSI_COLOR_BLUE "d";
+	char *link = ANSI_COLOR_MAGENTA "l";
+
+	if (S_ISDIR(file->st_mode))
+	{
+		strcpy(perm_str, dir);
+	}
+	else
+	{
+		strcpy(perm_str, dash_perm);
+	}
+
+	if (S_ISLNK(file->st_mode))
+	{
+		strcpy(perm_str, link);
+	}
+
+	strcpy(perm_str + 6, (file->st_mode & S_IRUSR) ? read_perm : dash_perm);
+	strcpy(perm_str + 12, (file->st_mode & S_IWUSR) ? write_perm : dash_perm);
+	strcpy(perm_str + 18, (file->st_mode & S_IXGRP) ? exec_perm : dash_perm);
+	strcpy(perm_str + 24, (file->st_mode & S_IRGRP) ? read_perm : dash_perm);
+	strcpy(perm_str + 30, (file->st_mode & S_IWGRP) ? write_perm : dash_perm);
+	strcpy(perm_str + 36, (file->st_mode & S_IXGRP) ? exec_perm : dash_perm);
+	strcpy(perm_str + 42, (file->st_mode & S_IROTH) ? read_perm : dash_perm);
+	strcpy(perm_str + 48, (file->st_mode & S_IWOTH) ? write_perm : dash_perm);
+	strcpy(perm_str + 54, (file->st_mode & S_IXOTH) ? exec_perm : dash_perm);
+
+	return perm_str;
 }
 
 char *get_file_size(off_t size)
@@ -74,8 +110,8 @@ char *get_file_size(off_t size)
 	{
 		sprintf(size_str, "%0.1f %s", (float)size / 1000000000000, SHORT_TERABYTE);
 	}
-       	else
-       	{
+	else
+	{
 		sprintf(size_str, "%0.1f %s", (float)size / 1000000000000000, SHORT_PETABYTE);
 	}
 
@@ -97,7 +133,7 @@ void read_directory(char *directory_name)
 		struct passwd *pws;
 		struct group *grp;
 
-		pws = getpwuid(file_information.st_uid);		
+		pws = getpwuid(file_information.st_uid);
 		grp = getgrgid(file_information.st_gid);
 
 		char file_modified_time_str[20];
@@ -106,15 +142,18 @@ void read_directory(char *directory_name)
 		strftime(file_modified_time_str, 20, "%d %b %H:%M", file_modified_time);
 
 		char *file_size = get_file_size(file_information.st_size);
+		char *file_perm = get_file_permimssions(&file_information);
 
+		printf("%s%s ", ANSI_COLOR_MAGENTA, file_perm);
 		printf("%s%s ", ANSI_COLOR_YELLOW, pws->pw_name);
 		printf("%s%s ", ANSI_COLOR_BLUE, grp->gr_name);
 		printf("%s%7s ", ANSI_COLOR_RED, file_size);
-		printf("%6s%s ", ANSI_COLOR_MAGENTA, file_modified_time_str);
-		printf("%s ", element->d_name);
+		printf("%6s%s ", ANSI_COLOR_GREEN, file_modified_time_str);
+		printf("%s%s ", ANSI_COLOR_MAGENTA, element->d_name);
 		printf("\n");
 
 		free(file_size);
+		free(file_perm);
 	}
 
 	closedir(directory);
