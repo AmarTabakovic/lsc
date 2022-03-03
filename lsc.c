@@ -64,33 +64,43 @@ int alpha_sort(const void *str1, const void *str2)
 }
 
 /**
- * @brief Get the longest uid name object
- *
- * @return int
+ * @brief Get the longest uid and gid name object
+ * 
+ * @param directory_name 
+ * @param uid_len 
+ * @param gid_len 
  */
-int get_longest_uid_name()
+void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_len)
 {
-	return 0;
-}
+	DIR *directory = opendir(directory_name);
+	struct dirent *element;
+	struct stat file_information;
+	char *longest_uid = malloc(sizeof(char) * 256);
+	char *longest_gid = malloc(sizeof(char) * 256);
 
-/**
- * @brief Get the longest gid name object
- *
- * @return int
- */
-int get_longest_gid_name()
-{
-	return 0;
-}
+	while ((element = readdir(directory)))
+	{
+		lstat(element->d_name, &file_information);
 
-/**
- * @brief Get the symlink path object
- *
- * @param file
- * @return char*
- */
-char *get_symlink_path(struct stat *file)
-{
+		struct passwd *pws = getpwuid(file_information.st_uid);
+		struct group *grp = getgrgid(file_information.st_gid);
+
+		if (strlen(pws->pw_name) > strlen(longest_uid))
+		{
+			strcpy(longest_uid, pws->pw_name);
+		}
+
+		if (strlen(grp->gr_name) > strlen(longest_gid))
+		{
+			strcpy(longest_gid, grp->gr_name);
+		}
+	}
+
+	*uid_len = strlen(longest_uid);
+	*gid_len = strlen(longest_gid);
+	closedir(directory);
+	free(longest_uid);
+	free(longest_gid);
 }
 
 /**
@@ -200,15 +210,17 @@ int read_directory(char *directory_name)
 
 	rewinddir(directory);
 
+	int longest_uid = 0;
+	int longest_gid = 0;
+
+	get_longest_uid_and_gid_name(directory_name, &longest_uid, &longest_gid);
+
 	while ((element = readdir(directory)))
 	{
 		lstat(element->d_name, &file_information);
 
-		struct passwd *pws;
-		struct group *grp;
-
-		pws = getpwuid(file_information.st_uid);
-		grp = getgrgid(file_information.st_gid);
+		struct passwd *pws = getpwuid(file_information.st_uid);
+		struct group *grp = getgrgid(file_information.st_gid);
 
 		char file_modified_time_str[20];
 		struct tm *file_modified_time;
@@ -219,11 +231,12 @@ int read_directory(char *directory_name)
 		char *file_perm = get_file_permimssions(&file_information);
 
 		char *symlink_buffer;
+		ssize_t symlink_size;
 
 		if (S_ISLNK(file_information.st_mode))
 		{
 			symlink_buffer = malloc(sizeof(char) * 256);
-			readlink(element->d_name, symlink_buffer, 256);
+			symlink_size = readlink(element->d_name, symlink_buffer, sizeof(char) * 256);
 		}
 		else
 		{
@@ -231,16 +244,16 @@ int read_directory(char *directory_name)
 		}
 
 		printf(ANSI_COLOR_MAGENTA "%s ", file_perm);
-		printf(ANSI_COLOR_YELLOW "%s ", pws->pw_name);
-		printf(ANSI_COLOR_BLUE "%s ", grp->gr_name);
+		printf(ANSI_COLOR_YELLOW "%-*s ", longest_uid + 2, pws->pw_name);
+		printf(ANSI_COLOR_BLUE "%-*s ", longest_gid + 2, grp->gr_name);
 		printf(ANSI_COLOR_RED "%7s ", file_size);
 		printf(ANSI_COLOR_GREEN "%s ", file_modified_time_str);
-		printf(ANSI_COLOR_MAGENTA "%s ", element->d_name);
+		printf(ANSI_COLOR_MAGENTA "%s", element->d_name);
 
 		if (S_ISLNK(file_information.st_mode))
 		{
-			printf(ANSI_COLOR_RESET "-> ");
-			printf(ANSI_COLOR_RED "%s", symlink_buffer);
+			printf(ANSI_COLOR_RESET " -> ");
+			printf(ANSI_COLOR_RED "%.*s", (int)symlink_size, symlink_buffer);
 		}
 
 		printf("\n");
