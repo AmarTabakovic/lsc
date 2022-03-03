@@ -63,14 +63,13 @@ char *get_file_permimssions(struct stat *file)
 	{
 		strcpy(perm_str, dir);
 	}
+	else if (S_ISLNK(file->st_mode))
+	{
+		strcpy(perm_str, link);
+	}
 	else
 	{
 		strcpy(perm_str, dash_perm);
-	}
-
-	if (S_ISLNK(file->st_mode))
-	{
-		strcpy(perm_str, link);
 	}
 
 	strcpy(perm_str + 6, (file->st_mode & S_IRUSR) ? read_perm : dash_perm);
