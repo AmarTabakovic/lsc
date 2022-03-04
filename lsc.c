@@ -37,8 +37,7 @@
 #define TIME_FORMAT "%d %b %H:%M"
 
 /**
- * @brief
- *
+ * Represents a row of a listing.
  */
 typedef struct Entry
 {
@@ -52,11 +51,11 @@ typedef struct Entry
 } Entry;
 
 /**
- * @brief
+ * @brief Helper function for sorting alphabetically.
  *
- * @param str1
- * @param str2
- * @return int
+ * @param str1 first string
+ * @param str2 second string
+ * @return int difference between the strings
  */
 int alpha_sort(const void *str1, const void *str2)
 {
@@ -64,11 +63,12 @@ int alpha_sort(const void *str1, const void *str2)
 }
 
 /**
- * @brief Get the longest uid and gid name object
+ * @brief Returns the length longest user ID and group ID of a directory
+ *	  with a given directory name.
  *
- * @param directory_name
- * @param uid_len
- * @param gid_len
+ * @param directory_name directory name 
+ * @param uid_len pointer to save the length of the longest user ID to
+ * @param gid_len pointer to save the length of the longest group ID to
  */
 void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_len)
 {
@@ -98,16 +98,20 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
 
 	*uid_len = strlen(longest_uid);
 	*gid_len = strlen(longest_gid);
+
 	closedir(directory);
+
 	free(longest_uid);
 	free(longest_gid);
 }
 
 /**
- * @brief Get the file permimssions object
+ * @brief Returns the file permisssions of a file as a colored string.
  *
- * @param file
- * @return char*
+ * The returned string must be freed using free().
+ *
+ * @param file file
+ * @return char* colored permissions string
  */
 char *get_file_permimssions(struct stat *file)
 {
@@ -148,10 +152,12 @@ char *get_file_permimssions(struct stat *file)
 }
 
 /**
- * @brief Get the file size object
+ * @brief Returns the size of a file as a string with its unit as a single letter.
  *
- * @param size
- * @return char*
+ * The returned string must be freed using free().
+ *
+ * @param size size of the file
+ * @return char* file size with the unit at the end
  */
 char *get_file_size(off_t size)
 {
@@ -186,10 +192,10 @@ char *get_file_size(off_t size)
 }
 
 /**
- * @brief
+ * @brief Reads and prints a directory with colored output.
  *
- * @param directory_name
- * @return int
+ * @param directory_name directory name
+ * @return int 0 if no errors occurred, 1 otherwise 
  */
 int read_directory(char *directory_name)
 {
@@ -231,7 +237,7 @@ int read_directory(char *directory_name)
 		char *file_perm = get_file_permimssions(&file_information);
 
 		char *symlink_buffer;
-		ssize_t symlink_size;
+		ssize_t symlink_size = 0;
 
 		if (S_ISLNK(file_information.st_mode))
 		{
@@ -276,11 +282,11 @@ int read_directory(char *directory_name)
 }
 
 /**
- * @brief
+ * @brief Main function.
  *
- * @param argc
- * @param argv
- * @return int
+ * @param argc number of command line arguments
+ * @param argv list command line arguments
+ * @return int return code
  */
 int main(int argc, char *argv[])
 {
