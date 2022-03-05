@@ -169,23 +169,23 @@ char *get_file_size(off_t size)
 	}
 	else if (size >= 1000 && size < 1000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_KILOBYTE, (float)(size / 1000));
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_KILOBYTE, (float)size / 1000);
 	}
 	else if (size >= 1000000 && size < 1000000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_MEGABYTE, (float)(size / 1000000));
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_MEGABYTE, (float)size / 1000000);
 	}
 	else if (size >= 1000000000 && size < 1000000000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_GIGABYTE, (float)(size / 1000000000));
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_GIGABYTE, (float)size / 1000000000);
 	}
 	else if (size >= 1000000000000 && size < 1000000000000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_TERABYTE, (float)(size / 1000000000000));
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_TERABYTE, (float)size / 1000000000000);
 	}
 	else
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_PETABYTE, (float)(size / 1000000000000000));
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_PETABYTE, (float)size / 1000000000000000);
 	}
 
 	return size_str;
