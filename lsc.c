@@ -324,6 +324,8 @@ int read_directory(char *directory_name, int show_directory_name)
 		printf("\n");
 	}
 
+	printf(ANSI_COLOR_RESET);
+
 	chdir(cwd);
 	free(cwd);
 	closedir(directory);
