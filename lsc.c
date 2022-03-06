@@ -66,7 +66,7 @@
  * @brief Returns the length longest user ID and group ID of a directory
  *	  with a given directory name.
  *
- * @param directory_name directory name 
+ * @param directory_name directory name
  * @param uid_len pointer to save the length of the longest user ID to
  * @param gid_len pointer to save the length of the longest group ID to
  */
@@ -75,8 +75,8 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
 	DIR *directory = opendir(directory_name);
 	struct dirent *element;
 	struct stat file_information;
-	char *longest_uid = malloc(sizeof(char) * 256);
-	char *longest_gid = malloc(sizeof(char) * 256);
+	char *longest_uid = malloc(sizeof(char) * 255);
+	char *longest_gid = malloc(sizeof(char) * 255);
 
 	while ((element = readdir(directory)))
 	{
@@ -195,19 +195,26 @@ char *get_file_size(off_t size)
  * @brief Reads and prints a directory with colored output.
  *
  * @param directory_name directory name
- * @return int 0 if no errors occurred, 1 otherwise 
+ * @return int 0 if no errors occurred, 1 otherwise
  */
 int read_directory(char *directory_name)
 {
-	DIR *directory = opendir(directory_name);
-	struct dirent *element;
-	struct stat file_information;
-	int number_of_files = 0;
+	char *cwd = malloc(sizeof(char) * 4096);
+	cwd = getcwd(NULL, sizeof(cwd));
 
-	if (chdir(directory_name) != 0)
+	if (chdir(cwd) != 0)
 	{
 		return 1;
 	}
+
+	DIR *directory;
+	if ((directory = opendir(directory_name)) == NULL)
+	{
+		return 1;
+	}
+	struct dirent *element;
+	struct stat file_information;
+	int number_of_files = 0;
 
 	while ((element = readdir(directory)))
 	{
@@ -241,8 +248,8 @@ int read_directory(char *directory_name)
 
 		if (S_ISLNK(file_information.st_mode))
 		{
-			symlink_buffer = malloc(sizeof(char) * 256);
-			symlink_size = readlink(element->d_name, symlink_buffer, sizeof(char) * 256);
+			symlink_buffer = malloc(sizeof(char) * 4096);
+			symlink_size = readlink(element->d_name, symlink_buffer, sizeof(char) * 4096);
 		}
 		else
 		{
@@ -268,6 +275,8 @@ int read_directory(char *directory_name)
 		free(file_perm);
 		free(symlink_buffer);
 	}
+
+	free(cwd);
 
 	closedir(directory);
 
