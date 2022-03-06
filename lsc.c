@@ -39,7 +39,7 @@
 /**
  * Represents a row of a listing.
  */
-typedef struct Entry
+/*typedef struct Entry
 {
 	char permission_string[10];
 	char user_name[255];
@@ -48,7 +48,7 @@ typedef struct Entry
 	char date_string[13];
 	char file_name[255];
 	off_t size;
-} Entry;
+} Entry;*/
 
 /**
  * @brief Helper function for sorting alphabetically.
@@ -57,10 +57,10 @@ typedef struct Entry
  * @param str2 second string
  * @return int difference between the strings
  */
-int alpha_sort(const void *str1, const void *str2)
+/*int alpha_sort(const void *str1, const void *str2)
 {
 	return (strcmp((char *)str1, (char *)str2));
-}
+}*/
 
 /**
  * @brief Returns the length longest user ID and group ID of a directory
