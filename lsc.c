@@ -34,7 +34,7 @@
 #define LINK_PERM "l"
 #define DASH_PERM "-"
 
-#define TIME_FORMAT "%d %b %H:%M"
+#define TIME_FORMAT "%e %b %H:%M"
 
 /**
  * Represents a row of a listing.
