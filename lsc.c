@@ -32,6 +32,9 @@
 
 #define DIR_PERM "d"
 #define LINK_PERM "l"
+#define BLOCK_PERM "b"
+#define SOCK_PERM "s"
+#define PIPE_PERM "p"
 #define DASH_PERM "-"
 
 #define TIME_FORMAT "%e %b %H:%M"
@@ -122,8 +125,12 @@ char *get_file_permimssions(struct stat *file)
 	char *write_perm = ANSI_COLOR_GREEN WRITE_PERM;
 	char *exec_perm = ANSI_COLOR_RED EXEC_PERM;
 	char *dash_perm = ANSI_COLOR_BLACK DASH_PERM;
+
 	char *dir_perm = ANSI_COLOR_BLUE DIR_PERM;
 	char *link_perm = ANSI_COLOR_MAGENTA LINK_PERM;
+	char *block_perm = ANSI_COLOR_CYAN BLOCK_PERM;
+	char *sock_perm = ANSI_COLOR_BLUE SOCK_PERM;
+	char *pipe_perm = ANSI_COLOR_CYAN PIPE_PERM;
 
 	if (S_ISDIR(file->st_mode))
 	{
@@ -132,6 +139,18 @@ char *get_file_permimssions(struct stat *file)
 	else if (S_ISLNK(file->st_mode))
 	{
 		strcpy(perm_str, link_perm);
+	}
+	else if (S_ISBLK(file->st_mode))
+	{
+		strcpy(perm_str, block_perm);
+	}
+	else if (S_ISSOCK(file->st_mode))
+	{
+		strcpy(perm_str, sock_perm);
+	}
+	else if (S_ISFIFO(file->st_mode))
+	{
+		strcpy(perm_str, pipe_perm);
 	}
 	else
 	{
