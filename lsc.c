@@ -200,9 +200,20 @@ char *get_file_size(off_t size)
 int read_directory(char *directory_name)
 {
 	char *cwd = malloc(sizeof(char) * 4096);
-	cwd = getcwd(NULL, sizeof(cwd));
+	getcwd(cwd, sizeof(char) * 4096);
 
-	if (chdir(cwd) != 0)
+	int chdir_code = 0;
+
+	if (*directory_name != '/')
+	{
+		chdir_code = chdir(cwd);
+	}
+	else
+	{
+		chdir_code = chdir(directory_name);
+	}
+
+	if (chdir_code != 0)
 	{
 		return 1;
 	}
@@ -212,6 +223,7 @@ int read_directory(char *directory_name)
 	{
 		return 1;
 	}
+
 	struct dirent *element;
 	struct stat file_information;
 	int number_of_files = 0;
