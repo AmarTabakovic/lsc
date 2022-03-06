@@ -220,9 +220,10 @@ char *get_file_size(off_t size)
  * @brief Reads and prints a directory with colored output.
  *
  * @param directory_name directory name
+ * @param show_directory_name whether the directory name should be shown
  * @return int 0 if no errors occurred, 1 otherwise
  */
-int read_directory(char *directory_name)
+int read_directory(char *directory_name, int show_directory_name)
 {
 	char *cwd = malloc(sizeof(char) * 4096);
 	getcwd(cwd, sizeof(char) * 4096);
@@ -264,6 +265,11 @@ int read_directory(char *directory_name)
 	int longest_gid = 0;
 
 	get_longest_uid_and_gid_name(directory_name, &longest_uid, &longest_gid);
+
+	if (show_directory_name == 1)
+	{
+		printf(ANSI_COLOR_MAGENTA "%s:\n", directory_name);
+	}
 
 	while ((element = readdir(directory)))
 	{
@@ -313,8 +319,13 @@ int read_directory(char *directory_name)
 		free(symlink_buffer);
 	}
 
-	free(cwd);
+	if (show_directory_name == 1)
+	{
+		printf("\n");
+	}
 
+	chdir(cwd);
+	free(cwd);
 	closedir(directory);
 
 	/*
@@ -340,21 +351,28 @@ int main(int argc, char *argv[])
 
 	if (argc < 2)
 	{
-		directory_to_read = ".";
+		if (read_directory(".", 0) != 0)
+		{
+			printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the current directory.\n");
+		}
 	}
-	else if (argc > 2)
+	else if (argc == 2)
 	{
-		printf(PROGRAM_NAME ": You can only enter 1 directory.\n");
-		return 1;
+		if (read_directory(*(argv + 1), 0) != 0)
+		{
+			printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the entered directory: %s\n", *(argv + 1));
+		}
 	}
 	else
 	{
-		directory_to_read = argv[1];
-	}
-
-	if (read_directory(directory_to_read) != 0)
-	{
-		printf(PROGRAM_NAME ": Error with the entered directory.\n");
+		for (int i = 1; i < argc; i++)
+		{
+			char *current_dir = *(argv + i);
+			if (read_directory(current_dir, 1) != 0)
+			{
+				printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the entered directory: %s\n", current_dir);
+			}
+		}
 	}
 
 	return 0;
