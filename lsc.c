@@ -32,6 +32,7 @@
 
 #define DIR_PERM "d"
 #define LINK_PERM "l"
+#define DEV_PERM "c"
 #define BLOCK_PERM "b"
 #define SOCK_PERM "s"
 #define PIPE_PERM "p"
@@ -129,6 +130,7 @@ char *get_file_permimssions(struct stat *file)
 	char *dir_perm = ANSI_COLOR_BLUE DIR_PERM;
 	char *link_perm = ANSI_COLOR_MAGENTA LINK_PERM;
 	char *block_perm = ANSI_COLOR_CYAN BLOCK_PERM;
+	char *dev_perm = ANSI_COLOR_MAGENTA DEV_PERM;
 	char *sock_perm = ANSI_COLOR_BLUE SOCK_PERM;
 	char *pipe_perm = ANSI_COLOR_CYAN PIPE_PERM;
 
@@ -143,6 +145,10 @@ char *get_file_permimssions(struct stat *file)
 	else if (S_ISBLK(file->st_mode))
 	{
 		strcpy(perm_str, block_perm);
+	}
+	else if (S_ISCHR(file->st_mode))
+	{
+		strcpy(perm_str, dev_perm);
 	}
 	else if (S_ISSOCK(file->st_mode))
 	{
