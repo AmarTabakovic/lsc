@@ -232,10 +232,14 @@ int read_directory(char *directory_name, int show_directory_name)
 
 	if (*directory_name != '/')
 	{
+		strcat(cwd, "/");
+		strcat(cwd, directory_name);
+		printf("%s", cwd);
 		chdir_code = chdir(cwd);
 	}
 	else
 	{
+		strcpy(cwd, directory_name);
 		chdir_code = chdir(directory_name);
 	}
 
@@ -245,7 +249,7 @@ int read_directory(char *directory_name, int show_directory_name)
 	}
 
 	DIR *directory;
-	if ((directory = opendir(directory_name)) == NULL)
+	if ((directory = opendir(cwd)) == NULL)
 	{
 		return 1;
 	}
@@ -264,7 +268,7 @@ int read_directory(char *directory_name, int show_directory_name)
 	int longest_uid = 0;
 	int longest_gid = 0;
 
-	get_longest_uid_and_gid_name(directory_name, &longest_uid, &longest_gid);
+	get_longest_uid_and_gid_name(cwd, &longest_uid, &longest_gid);
 
 	if (show_directory_name == 1)
 	{
@@ -326,7 +330,7 @@ int read_directory(char *directory_name, int show_directory_name)
 
 	printf(ANSI_COLOR_RESET);
 
-	chdir(cwd);
+	//chdir(cwd);
 	free(cwd);
 	closedir(directory);
 
