@@ -23,6 +23,7 @@ $ ./lsc [directory_name_1] [directory_name_2]
 ```
 
 ## Todo
+- Sorting
 - Options and flags
 	- `-l` for displaying informations about the file
 	- `-s` for sorting according to the file size
