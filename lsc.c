@@ -234,7 +234,6 @@ int read_directory(char *directory_name, int show_directory_name)
 	{
 		strcat(cwd, "/");
 		strcat(cwd, directory_name);
-		printf("%s", cwd);
 		chdir_code = chdir(cwd);
 	}
 	else
