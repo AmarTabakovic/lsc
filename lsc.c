@@ -41,20 +41,6 @@
 #define TIME_FORMAT "%e %b %H:%M"
 
 /**
- * Represents a row of a listing.
- */
-/*typedef struct Entry
-{
-	char permission_string[10];
-	char user_name[255];
-	char group_name[255];
-	char size_string[5];
-	char date_string[13];
-	char file_name[255];
-	off_t size;
-} Entry;*/
-
-/**
  * @brief Helper function for sorting alphabetically.
  *
  * @param str1 first string
@@ -329,16 +315,8 @@ int read_directory(char *directory_name, int show_directory_name)
 
 	printf(ANSI_COLOR_RESET);
 
-	//chdir(cwd);
 	free(cwd);
 	closedir(directory);
-
-	/*
-	for (int i = 0; i < number_of_files; i++)
-	{
-
-	}
-	*/
 
 	return 0;
 }
