@@ -7,6 +7,7 @@
 #include <grp.h>
 #include <time.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define PROGRAM_NAME "lsc"
 
@@ -157,6 +158,8 @@ char *get_file_permimssions_str(struct stat *file)
  * @brief Returns the size of a file as a string with its unit as a single letter.
  *
  * The returned string must be freed using free().
+ * 
+ * TODO: Use a better approach
  *
  * @param size size of the file
  * @return char* file size with the unit at the end
@@ -198,17 +201,16 @@ char *get_file_size_str(off_t size)
  *
  * @param directory_name directory name
  * @param show_directory_name whether the directory name should be shown
- * @return int 0 if no errors occurred, 1 otherwise
+ * @return int 0 if no errors occurred, -1 otherwise
  */
-int read_directory(char *directory_name, int show_directory_name)
+int read_directory(char *directory_name, bool show_directory_name)
 {
 	// Old directory to change back to at the very end
 	char *old_cwd = malloc(sizeof(char) * MAX_TEXT_BUFFER);
 	getcwd(old_cwd, sizeof(char) * MAX_TEXT_BUFFER);
 
-	//Full directory from which ls should be called
+	// Full directory from which ls should be called
 	char *cwd = malloc(sizeof(char) * MAX_TEXT_BUFFER);
-	getcwd(cwd, sizeof(char) * MAX_TEXT_BUFFER);
 
 	if (*directory_name == '/')
 	{
@@ -216,22 +218,22 @@ int read_directory(char *directory_name, int show_directory_name)
 	}
 	else
 	{
+		getcwd(cwd, sizeof(char) * MAX_TEXT_BUFFER);
 		strcat(cwd, "/");
 		strcat(cwd, directory_name);
 	}
 
 	DIR *directory;
+
 	if (chdir(cwd) != 0 || (directory = opendir(cwd)) == NULL)
 	{
 		free(old_cwd);
 		free(cwd);
 
-		return 1;
+		return -1;
 	}
 
 	struct dirent *element;
-	struct stat file_information;
-
 	int number_of_files = 0;
 
 	while ((element = readdir(directory)))
@@ -246,10 +248,12 @@ int read_directory(char *directory_name, int show_directory_name)
 
 	get_longest_uid_and_gid_name(cwd, &longest_uid, &longest_gid);
 
-	if (show_directory_name == 1)
+	if (show_directory_name)
 	{
 		printf(ANSI_COLOR_MAGENTA "%s:\n", directory_name);
 	}
+
+	struct stat file_information;
 
 	while ((element = readdir(directory)))
 	{
@@ -266,8 +270,8 @@ int read_directory(char *directory_name, int show_directory_name)
 
 		strftime(file_modified_time_str, file_modified_time_str_len, TIME_FORMAT, file_modified_time);
 
-		char *file_size = get_file_size_str(file_information.st_size);
-		char *file_perm = get_file_permimssions_str(&file_information);
+		char *file_size_str = get_file_size_str(file_information.st_size);
+		char *file_perm_str = get_file_permimssions_str(&file_information);
 
 		char *symlink_buffer;
 		ssize_t symlink_size = 0;
@@ -277,15 +281,11 @@ int read_directory(char *directory_name, int show_directory_name)
 			symlink_buffer = malloc(sizeof(char) * MAX_TEXT_BUFFER);
 			symlink_size = readlink(element->d_name, symlink_buffer, sizeof(char) * MAX_TEXT_BUFFER);
 		}
-		else
-		{
-			symlink_buffer = malloc(sizeof(char));
-		}
 
-		printf(ANSI_COLOR_MAGENTA "%s ", file_perm);
+		printf(ANSI_COLOR_MAGENTA "%s ", file_perm_str);
 		printf(ANSI_COLOR_YELLOW "%-*s ", longest_uid + 2, pws->pw_name);
 		printf(ANSI_COLOR_BLUE "%-*s ", longest_gid + 2, grp->gr_name);
-		printf(ANSI_COLOR_RED "%7s ", file_size);
+		printf(ANSI_COLOR_RED "%7s ", file_size_str);
 		printf(ANSI_COLOR_GREEN "%s ", file_modified_time_str);
 		printf(ANSI_COLOR_MAGENTA "%s", element->d_name);
 
@@ -293,16 +293,16 @@ int read_directory(char *directory_name, int show_directory_name)
 		{
 			printf(ANSI_COLOR_RESET " -> ");
 			printf(ANSI_COLOR_RED "%.*s", (int)symlink_size, symlink_buffer);
+			free(symlink_buffer);
 		}
 
 		printf("\n" ANSI_COLOR_RESET);
 
-		free(file_size);
-		free(file_perm);
-		free(symlink_buffer);
+		free(file_size_str);
+		free(file_perm_str);
 	}
 
-	if (show_directory_name == 1)
+	if (show_directory_name)
 	{
 		printf("\n");
 	}
@@ -311,9 +311,10 @@ int read_directory(char *directory_name, int show_directory_name)
 
 	free(cwd);
 
-	if(chdir(old_cwd) != 0) {
+	if (chdir(old_cwd) != 0)
+	{
 		free(old_cwd);
-		return 1;
+		return -1;
 	}
 
 	free(old_cwd);
