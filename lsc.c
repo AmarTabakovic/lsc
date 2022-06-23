@@ -56,8 +56,9 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
 	DIR *directory = opendir(directory_name);
 	struct dirent *element;
 	struct stat file_information;
-	char *longest_uid = malloc(sizeof(char) * 255);
-	char *longest_gid = malloc(sizeof(char) * 255);
+
+	size_t longest_uid = 0;
+	size_t longest_gid = 0;
 
 	while ((element = readdir(directory)))
 	{
@@ -66,24 +67,21 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
 		struct passwd *pws = getpwuid(file_information.st_uid);
 		struct group *grp = getgrgid(file_information.st_gid);
 
-		if (strlen(pws->pw_name) > strlen(longest_uid))
+		if (strlen(pws->pw_name) > longest_uid)
 		{
-			strcpy(longest_uid, pws->pw_name);
+			longest_uid = strlen(pws->pw_name);
 		}
 
-		if (strlen(grp->gr_name) > strlen(longest_gid))
+		if (strlen(grp->gr_name) > longest_gid)
 		{
-			strcpy(longest_gid, grp->gr_name);
+			longest_gid = strlen(grp->gr_name);
 		}
 	}
 
-	*uid_len = strlen(longest_uid);
-	*gid_len = strlen(longest_gid);
+	*uid_len = longest_uid;
+	*gid_len = longest_gid;
 
 	closedir(directory);
-
-	free(longest_uid);
-	free(longest_gid);
 }
 
 /**
