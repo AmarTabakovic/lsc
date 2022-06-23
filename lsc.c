@@ -40,17 +40,7 @@
 
 #define TIME_FORMAT "%e %b %H:%M"
 
-/**
- * @brief Helper function for sorting alphabetically.
- *
- * @param str1 first string
- * @param str2 second string
- * @return int difference between the strings
- */
-/*int alpha_sort(const void *str1, const void *str2)
-{
-	return (strcmp((char *)str1, (char *)str2));
-}*/
+#define MAX_TEXT_BUFFER 4096
 
 /**
  * @brief Returns the length longest user ID and group ID of a directory
@@ -103,8 +93,9 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
  * @param file file
  * @return char* colored permissions string
  */
-char *get_file_permimssions(struct stat *file)
+char *get_file_permimssions_str(struct stat *file)
 {
+	// 7 chars for colors times 10 permission characters
 	char *perm_str = malloc(sizeof(char) * 7 * 10);
 
 	// TODO: Define symbolic constants or macros to avoid these variables
@@ -150,14 +141,14 @@ char *get_file_permimssions(struct stat *file)
 	}
 
 	strcpy(perm_str + 6, (file->st_mode & S_IRUSR) ? read_perm : dash_perm);
-	strcpy(perm_str + 12, (file->st_mode & S_IWUSR) ? write_perm : dash_perm);
-	strcpy(perm_str + 18, (file->st_mode & S_IXGRP) ? exec_perm : dash_perm);
-	strcpy(perm_str + 24, (file->st_mode & S_IRGRP) ? read_perm : dash_perm);
-	strcpy(perm_str + 30, (file->st_mode & S_IWGRP) ? write_perm : dash_perm);
-	strcpy(perm_str + 36, (file->st_mode & S_IXGRP) ? exec_perm : dash_perm);
-	strcpy(perm_str + 42, (file->st_mode & S_IROTH) ? read_perm : dash_perm);
-	strcpy(perm_str + 48, (file->st_mode & S_IWOTH) ? write_perm : dash_perm);
-	strcpy(perm_str + 54, (file->st_mode & S_IXOTH) ? exec_perm : dash_perm);
+	strcpy(perm_str + (6 * 2), (file->st_mode & S_IWUSR) ? write_perm : dash_perm);
+	strcpy(perm_str + (6 * 3), (file->st_mode & S_IXGRP) ? exec_perm : dash_perm);
+	strcpy(perm_str + (6 * 4), (file->st_mode & S_IRGRP) ? read_perm : dash_perm);
+	strcpy(perm_str + (6 * 5), (file->st_mode & S_IWGRP) ? write_perm : dash_perm);
+	strcpy(perm_str + (6 * 6), (file->st_mode & S_IXGRP) ? exec_perm : dash_perm);
+	strcpy(perm_str + (6 * 7), (file->st_mode & S_IROTH) ? read_perm : dash_perm);
+	strcpy(perm_str + (6 * 8), (file->st_mode & S_IWOTH) ? write_perm : dash_perm);
+	strcpy(perm_str + (6 * 9), (file->st_mode & S_IXOTH) ? exec_perm : dash_perm);
 
 	return perm_str;
 }
@@ -170,7 +161,7 @@ char *get_file_permimssions(struct stat *file)
  * @param size size of the file
  * @return char* file size with the unit at the end
  */
-char *get_file_size(off_t size)
+char *get_file_size_str(off_t size)
 {
 	char *size_str = malloc(sizeof(char) * 8);
 
@@ -211,36 +202,38 @@ char *get_file_size(off_t size)
  */
 int read_directory(char *directory_name, int show_directory_name)
 {
-	char *cwd = malloc(sizeof(char) * 4096);
-	getcwd(cwd, sizeof(char) * 4096);
+	// Old directory to change back to at the very end
+	char *old_cwd = malloc(sizeof(char) * MAX_TEXT_BUFFER);
+	getcwd(old_cwd, sizeof(char) * MAX_TEXT_BUFFER);
+
+	//Full directory from which ls should be called
+	char *cwd = malloc(sizeof(char) * MAX_TEXT_BUFFER);
+	getcwd(cwd, sizeof(char) * MAX_TEXT_BUFFER);
 
 	int chdir_code = 0;
 
-	if (*directory_name != '/')
+	if (*directory_name == '/')
 	{
-		strcat(cwd, "/");
-		strcat(cwd, directory_name);
-		chdir_code = chdir(cwd);
+		strcpy(cwd, directory_name);
 	}
 	else
 	{
-		strcpy(cwd, directory_name);
-		chdir_code = chdir(directory_name);
-	}
-
-	if (chdir_code != 0)
-	{
-		return 1;
+		strcat(cwd, "/");
+		strcat(cwd, directory_name);
 	}
 
 	DIR *directory;
-	if ((directory = opendir(cwd)) == NULL)
+	if (chdir(cwd) != 0 || (directory = opendir(cwd)) == NULL)
 	{
+		free(old_cwd);
+		free(cwd);
+
 		return 1;
 	}
 
 	struct dirent *element;
 	struct stat file_information;
+
 	int number_of_files = 0;
 
 	while ((element = readdir(directory)))
@@ -267,21 +260,24 @@ int read_directory(char *directory_name, int show_directory_name)
 		struct passwd *pws = getpwuid(file_information.st_uid);
 		struct group *grp = getgrgid(file_information.st_gid);
 
-		char file_modified_time_str[20];
+		int file_modified_time_str_len = 20;
+		char file_modified_time_str[file_modified_time_str_len];
+
 		struct tm *file_modified_time;
 		file_modified_time = localtime(&file_information.st_mtime);
-		strftime(file_modified_time_str, 20, TIME_FORMAT, file_modified_time);
 
-		char *file_size = get_file_size(file_information.st_size);
-		char *file_perm = get_file_permimssions(&file_information);
+		strftime(file_modified_time_str, file_modified_time_str_len, TIME_FORMAT, file_modified_time);
+
+		char *file_size = get_file_size_str(file_information.st_size);
+		char *file_perm = get_file_permimssions_str(&file_information);
 
 		char *symlink_buffer;
 		ssize_t symlink_size = 0;
 
 		if (S_ISLNK(file_information.st_mode))
 		{
-			symlink_buffer = malloc(sizeof(char) * 4096);
-			symlink_size = readlink(element->d_name, symlink_buffer, sizeof(char) * 4096);
+			symlink_buffer = malloc(sizeof(char) * MAX_TEXT_BUFFER);
+			symlink_size = readlink(element->d_name, symlink_buffer, sizeof(char) * MAX_TEXT_BUFFER);
 		}
 		else
 		{
@@ -301,7 +297,7 @@ int read_directory(char *directory_name, int show_directory_name)
 			printf(ANSI_COLOR_RED "%.*s", (int)symlink_size, symlink_buffer);
 		}
 
-		printf("\n");
+		printf("\n" ANSI_COLOR_RESET);
 
 		free(file_size);
 		free(file_perm);
@@ -313,10 +309,16 @@ int read_directory(char *directory_name, int show_directory_name)
 		printf("\n");
 	}
 
-	printf(ANSI_COLOR_RESET);
+	closedir(directory);
 
 	free(cwd);
-	closedir(directory);
+
+	if(chdir(old_cwd) != 0) {
+		free(old_cwd);
+		return 1;
+	}
+
+	free(old_cwd);
 
 	return 0;
 }
@@ -330,8 +332,6 @@ int read_directory(char *directory_name, int show_directory_name)
  */
 int main(int argc, char *argv[])
 {
-	char *directory_to_read;
-
 	if (argc < 2)
 	{
 		if (read_directory(".", 0) != 0)
@@ -350,10 +350,9 @@ int main(int argc, char *argv[])
 	{
 		for (int i = 1; i < argc; i++)
 		{
-			char *current_dir = *(argv + i);
-			if (read_directory(current_dir, 1) != 0)
+			if (read_directory(*(argv + i), 1) != 0)
 			{
-				printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the entered directory: %s\n", current_dir);
+				printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the entered directory: %s\n", *(argv + i));
 			}
 		}
 	}
