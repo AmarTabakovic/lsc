@@ -88,6 +88,8 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
  * @brief Returns the file permisssions of a file as a colored string.
  *
  * The returned string must be freed using free().
+ * 
+ * TODO: Improve approach
  *
  * @param file file
  * @return char* colored permissions string
@@ -307,15 +309,15 @@ int read_directory(char *directory_name, bool show_directory_name)
 
 	closedir(directory);
 
-	free(cwd);
-
-	if (chdir(old_cwd) != 0)
-	{
-		free(old_cwd);
-		return -1;
-	}
+	int final_chdir_code = chdir(old_cwd);
 
 	free(old_cwd);
+	free(cwd);
+	
+	if (final_chdir_code != 0)
+	{
+		return -1;
+	}
 
 	return 0;
 }
