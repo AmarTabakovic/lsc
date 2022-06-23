@@ -210,8 +210,6 @@ int read_directory(char *directory_name, int show_directory_name)
 	char *cwd = malloc(sizeof(char) * MAX_TEXT_BUFFER);
 	getcwd(cwd, sizeof(char) * MAX_TEXT_BUFFER);
 
-	int chdir_code = 0;
-
 	if (*directory_name == '/')
 	{
 		strcpy(cwd, directory_name);
