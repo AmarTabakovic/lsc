@@ -227,6 +227,7 @@ int read_directory(char *directory_name, bool show_directory_name)
 
 	if (chdir(cwd) != 0 || (directory = opendir(cwd)) == NULL)
 	{
+		chdir(old_cwd);
 		free(old_cwd);
 		free(cwd);
 
@@ -309,15 +310,10 @@ int read_directory(char *directory_name, bool show_directory_name)
 
 	closedir(directory);
 
-	int final_chdir_code = chdir(old_cwd);
 
+	chdir(old_cwd);
 	free(old_cwd);
 	free(cwd);
-	
-	if (final_chdir_code != 0)
-	{
-		return -1;
-	}
 
 	return 0;
 }
