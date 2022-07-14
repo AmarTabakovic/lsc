@@ -310,7 +310,6 @@ int read_directory(char *directory_name, bool show_directory_name)
 
 	closedir(directory);
 
-
 	chdir(old_cwd);
 	free(old_cwd);
 	free(cwd);
@@ -327,11 +326,13 @@ int read_directory(char *directory_name, bool show_directory_name)
  */
 int main(int argc, char *argv[])
 {
+	int return_code = 0;
 	if (argc < 2)
 	{
 		if (read_directory(".", 0) != 0)
 		{
 			printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the current directory.\n");
+			return_code = 1;
 		}
 	}
 	else if (argc == 2)
@@ -339,6 +340,7 @@ int main(int argc, char *argv[])
 		if (read_directory(*(argv + 1), 0) != 0)
 		{
 			printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the entered directory: %s\n", *(argv + 1));
+			return_code = 1;
 		}
 	}
 	else
@@ -348,9 +350,10 @@ int main(int argc, char *argv[])
 			if (read_directory(*(argv + i), 1) != 0)
 			{
 				printf(ANSI_COLOR_RESET PROGRAM_NAME ": Error with the entered directory: %s\n", *(argv + i));
+				return_code = 1;
 			}
 		}
 	}
 
-	return 0;
+	return return_code;
 }
