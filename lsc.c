@@ -70,14 +70,10 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
 		struct group *grp = getgrgid(file_information.st_gid);
 
 		if (strlen(pws->pw_name) > longest_uid)
-		{
 			longest_uid = strlen(pws->pw_name);
-		}
 
 		if (strlen(grp->gr_name) > longest_gid)
-		{
 			longest_gid = strlen(grp->gr_name);
-		}
 	}
 
 	*uid_len = longest_uid;
@@ -115,33 +111,19 @@ char *get_file_permimssions_str(struct stat *file)
 	char *pipe_perm = ANSI_COLOR_CYAN PIPE_PERM;
 
 	if (S_ISDIR(file->st_mode))
-	{
 		strcpy(perm_str, dir_perm);
-	}
 	else if (S_ISLNK(file->st_mode))
-	{
 		strcpy(perm_str, link_perm);
-	}
 	else if (S_ISBLK(file->st_mode))
-	{
 		strcpy(perm_str, block_perm);
-	}
 	else if (S_ISCHR(file->st_mode))
-	{
 		strcpy(perm_str, dev_perm);
-	}
 	else if (S_ISSOCK(file->st_mode))
-	{
 		strcpy(perm_str, sock_perm);
-	}
 	else if (S_ISFIFO(file->st_mode))
-	{
 		strcpy(perm_str, pipe_perm);
-	}
 	else
-	{
 		strcpy(perm_str, dash_perm);
-	}
 
 	strcpy(perm_str + 6, (file->st_mode & S_IRUSR) ? read_perm : dash_perm);
 	strcpy(perm_str + (6 * 2), (file->st_mode & S_IWUSR) ? write_perm : dash_perm);
@@ -171,29 +153,17 @@ char *get_file_size_str(off_t size)
 	char *size_str = malloc(sizeof(char) * 8);
 
 	if (size < 1000)
-	{
 		snprintf(size_str, sizeof(size_str), "%i " SHORT_BYTE, (int)size);
-	}
 	else if (size >= 1000 && size < 1000000)
-	{
 		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_KILOBYTE, (float)(size / 1000));
-	}
 	else if (size >= 1000000 && size < 1000000000)
-	{
 		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_MEGABYTE, (float)(size / 1000000));
-	}
 	else if (size >= 1000000000 && size < 1000000000000)
-	{
 		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_GIGABYTE, (float)(size / 1000000000));
-	}
 	else if (size >= 1000000000000 && size < 1000000000000000)
-	{
 		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_TERABYTE, (float)(size / 1000000000000));
-	}
 	else
-	{
 		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_PETABYTE, (float)(size / 1000000000000000));
-	}
 
 	return size_str;
 }
@@ -215,9 +185,7 @@ int read_directory(char *directory_name, bool show_directory_name)
 	char *cwd = malloc(sizeof(char) * MAX_TEXT_BUFFER);
 
 	if (*directory_name == '/')
-	{
 		strcpy(cwd, directory_name);
-	}
 	else
 	{
 		getcwd(cwd, sizeof(char) * MAX_TEXT_BUFFER);
@@ -240,9 +208,7 @@ int read_directory(char *directory_name, bool show_directory_name)
 	int number_of_files = 0;
 
 	while ((element = readdir(directory)))
-	{
 		number_of_files++;
-	}
 
 	rewinddir(directory);
 
@@ -252,9 +218,7 @@ int read_directory(char *directory_name, bool show_directory_name)
 	get_longest_uid_and_gid_name(cwd, &longest_uid, &longest_gid);
 
 	if (show_directory_name)
-	{
 		printf(ANSI_COLOR_MAGENTA "%s:\n", directory_name);
-	}
 
 	struct stat file_information;
 
@@ -306,9 +270,7 @@ int read_directory(char *directory_name, bool show_directory_name)
 	}
 
 	if (show_directory_name)
-	{
 		printf("\n");
-	}
 
 	closedir(directory);
 
