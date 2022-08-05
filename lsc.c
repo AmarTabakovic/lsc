@@ -30,15 +30,12 @@
 #define READ_PERM "r"
 #define WRITE_PERM "w"
 #define EXEC_PERM "x"
-
 #define DIR_PERM "d"
 #define LINK_PERM "l"
 #define DEV_PERM "c"
-
 #define BLOCK_PERM "b"
 #define SOCK_PERM "s"
 #define PIPE_PERM "p"
-
 #define DASH_PERM "-"
 
 #define TIME_FORMAT "%e %b %H:%M"
@@ -205,12 +202,6 @@ int read_directory(char *directory_name, bool show_directory_name)
 	}
 
 	struct dirent *element;
-	int number_of_files = 0;
-
-	while ((element = readdir(directory)))
-		number_of_files++;
-
-	rewinddir(directory);
 
 	int longest_uid = 0;
 	int longest_gid = 0;
