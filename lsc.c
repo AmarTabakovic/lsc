@@ -34,9 +34,11 @@
 #define DIR_PERM "d"
 #define LINK_PERM "l"
 #define DEV_PERM "c"
+
 #define BLOCK_PERM "b"
 #define SOCK_PERM "s"
 #define PIPE_PERM "p"
+
 #define DASH_PERM "-"
 
 #define TIME_FORMAT "%e %b %H:%M"
@@ -88,7 +90,7 @@ void get_longest_uid_and_gid_name(char *directory_name, int *uid_len, int *gid_l
  * @brief Returns the file permisssions of a file as a colored string.
  *
  * The returned string must be freed using free().
- * 
+ *
  * TODO: Improve approach
  *
  * @param file file
@@ -158,8 +160,8 @@ char *get_file_permimssions_str(struct stat *file)
  * @brief Returns the size of a file as a string with its unit as a single letter.
  *
  * The returned string must be freed using free().
- * 
- * TODO: Use a better approach
+ *
+ * TODO: Use a better approach, use multiples of two
  *
  * @param size size of the file
  * @return char* file size with the unit at the end
@@ -174,23 +176,23 @@ char *get_file_size_str(off_t size)
 	}
 	else if (size >= 1000 && size < 1000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_KILOBYTE, (float)size / 1000);
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_KILOBYTE, (float)(size / 1000));
 	}
 	else if (size >= 1000000 && size < 1000000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_MEGABYTE, (float)size / 1000000);
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_MEGABYTE, (float)(size / 1000000));
 	}
 	else if (size >= 1000000000 && size < 1000000000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_GIGABYTE, (float)size / 1000000000);
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_GIGABYTE, (float)(size / 1000000000));
 	}
 	else if (size >= 1000000000000 && size < 1000000000000000)
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_TERABYTE, (float)size / 1000000000000);
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_TERABYTE, (float)(size / 1000000000000));
 	}
 	else
 	{
-		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_PETABYTE, (float)size / 1000000000000000);
+		snprintf(size_str, sizeof(size_str), "%0.1f " SHORT_PETABYTE, (float)(size / 1000000000000000));
 	}
 
 	return size_str;
